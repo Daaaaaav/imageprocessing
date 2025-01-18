@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medisense Image Processing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Image Processing Tool</h1>
+    </header>
+    
+    <main>
+        <section id="imageOperations">
+            <form id="imageForm" onsubmit="event.preventDefault(); uploadImage();">
+                <fieldset>
+                    <legend><b>Upload and Process Your Image</b></legend>
+
+                    <div class="form-group">
+                        <label for="imageInput">Select an Image:</label>
+                        <input type="file" id="imageInput" name="image" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="operation">Choose an Operation:</label>
+                        <select id="operation" name="operation" onchange="toggleOptions()">
+                            <option value="greyscale">Greyscale</option>
+                            <option value="negative">Negative</option>
+                            <option value="flip">Flip</option>
+                            <option value="brightness">Brightness Adjustment</option>
+                            <option value="contrast">Contrast Adjustment</option>
+                            <option value="rotate">Rotate</option>
+                            <option value="scale">Scale</option>
+                            <option value="translation">Translation</option>
+                            <option value="histogram_equalization">Histogram Equalization</option>
+                            <option value="gamma_correction">Gamma Correction</option>
+                            <option value="rle_compression">Lossless Compression (RLE)</option>
+                            <option value="dct_compression">Lossy Compression (DCT)</option>
+                            <option value="global_thresholding">Global Thresholding</option>
+                            <option value="adaptive_thresholding">Adaptive Thresholding</option>
+                            <option value="k_means_clustering">K-Means Clustering</option>
+                            <option value="morphological">Morphological Operations</option>
+                            <option value="boundary_extraction">Boundary Extraction</option>
+                            <option value="skeletonization">Skeletonization</option>
+                            <option value="noise_reduction">Noise Reduction</option>
+                            <option value="inpainting">Inpainting</option>
+                            <option value="restoration">Restoration</option>
+                            <option value="feature_detection">Feature Detection (SIFT/ORB)</option>
+                            <option value="template_matching">Template Matching</option>
+                        </select>
+                    </div>
+
+                    <div id="valueGroup" style="display:none;">
+                        <label for="valueInput">Value:</label>
+                        <input type="range" min="1" max="100" value="50" class="slider" id="value">
+                    </div>
+                    <div id="rotationGroup" style="display:none;">
+                        <label for="angle">Rotation Angle (degrees):</label>
+                        <input type="range" min="1" max="360" value="90" class="slider" id="angle">
+                    </div>
+
+                    <div class="form-group" id="flipDirectionGroup" style="display: none;">
+                        <label for="direction">Flip Direction:</label>
+                        <select id="direction" name="direction">
+                            <option value="horizontal">Horizontal</option>
+                            <option value="vertical">Vertical</option>
+                            <option value="diagonal">Diagonal</option>
+                        </select>
+                    </div>
+
+                    <div id="translationGroup" style="display:none;">
+                        <label for="dxSlider">Horizontal Shift (dx):</label>
+                        <input type="range" id="dxSlider" min="-100" max="100" value="0">
+                        <span id="dxValue">0</span>
+                        <label for="dySlider">Vertical Shift (dy):</label>
+                        <input type="range" id="dySlider" min="-100" max="100" value="0">
+                        <span id="dyValue">0</span>
+                    </div>
+                    
+
+                    <div id="gammaCorrectionGroup" style="display:none;">
+                        <label for="gammaValue">Gamma Value:</label>
+                        <input type="number" min="0.1" step="0.1" value="1.0" id="gammaValue">
+                    </div>
+                    <button type="submit">Process Image</button>
+                </fieldset>
+            </form>
+        </section>
+                                     
+        <section id="previewContainer">
+            <p id="predictionText">Upload an image to see the result!</p>
+            <h2>Processed Image</h2>
+            <img id="processedImage" src="" alt="Processed Image Preview">
+        </section>
+    </main>
+</body>
+<script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</html>
