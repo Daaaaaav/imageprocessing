@@ -80,6 +80,10 @@ def contrast(image, value):
     enhancer = ImageEnhance.Contrast(image)
     return enhancer.enhance(value / 50)
 
+def add_border(image, border_size, border_color):
+    border_color = tuple(int(border_color[i:i+2], 16) for i in (0, 2, 4))
+    return ImageOps.expand(image, border=border_size, fill=border_color)
+
 def apply_filter(image, filter_type):
     if filter_type == 'sepia':
         sepia_filter = np.array([[0.393, 0.769, 0.189],
@@ -336,6 +340,7 @@ def inpainting(image, mask_image):
     mask = np.array(mask_image.convert('L'))
     result = cv2.inpaint(np.array(image), mask, 3, cv2.INPAINT_TELEA)
     return Image.fromarray(result)
+
 @app.route('/')
 def index():
     return render_template('index.html')
