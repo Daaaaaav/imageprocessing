@@ -28,7 +28,14 @@ def greyscale(image):
     return image.convert('L')
 
 def negative(image):
-    return ImageOps.invert(image)
+    if image.mode == 'RGBA':
+        r, g, b, a = image.split()
+        rgb_image = Image.merge('RGB', (r, g, b))
+        inverted_image = ImageOps.invert(rgb_image)
+        r, g, b = inverted_image.split()
+        return Image.merge('RGBA', (r, g, b, a))
+    else:
+        return ImageOps.invert(image)
 
 def change_color(image, target_color, replacement_color):
     np_img = np.array(image)
@@ -335,11 +342,6 @@ def template_matching(image, template_image):
     h, w = template.shape
     matched = cv2.rectangle(gray.copy(), top_left, (top_left[0] + w, top_left[1] + h), 255, 2)
     return Image.fromarray(matched)
-
-def inpainting(image, mask_image):
-    mask = np.array(mask_image.convert('L'))
-    result = cv2.inpaint(np.array(image), mask, 3, cv2.INPAINT_TELEA)
-    return Image.fromarray(result)
 
 @app.route('/')
 def index():
