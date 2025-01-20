@@ -3,97 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medisense Image Processing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Image Processing Tool</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
 </head>
 <body>
     <header>
+        <img src="/static/logo.png" alt="Logo" class="logo">
         <h1>Image Processing Tool</h1>
     </header>
     
     <main>
         <section id="imageOperations">
-            <form id="imageForm" onsubmit="event.preventDefault(); uploadImage();">
+            <form id="imageForm">
                 <fieldset>
                     <legend><b>Upload and Process Your Image</b></legend>
 
                     <div class="form-group">
                         <label for="imageInput">Select an Image:</label>
+                        <label for="imageInput" class="custom-file-upload">
+                            Choose File
+                        </label>
                         <input type="file" id="imageInput" name="image" accept="image/*" required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label for="operation">Choose an Operation:</label>
+                        <label for="operation">Select Operation:</label>
                         <select id="operation" name="operation" onchange="toggleOptions()">
                             <option value="greyscale">Greyscale</option>
                             <option value="negative">Negative</option>
                             <option value="flip">Flip</option>
-                            <option value="brightness">Brightness Adjustment</option>
-                            <option value="contrast">Contrast Adjustment</option>
+                            <option value="brightness">Brightness</option>
+                            <option value="contrast">Contrast</option>
                             <option value="rotate">Rotate</option>
                             <option value="scale">Scale</option>
                             <option value="translation">Translation</option>
+                            <option value="crop">Crop</option>
+                            <option value="blend">Blend</option>
+                            <option value="adjust_rgb">Adjust RGB</option>
+                            <option value="change_color">Change Color</option>
+                            <option value="sepia_filter">Sepia Filter</option>
+                            <option value="cyano_filter">Cyano Filter</option>
+                            <option value="custom_filter">Custom Filter</option>
+                            <option value="fourier_transform">Fourier Transform</option>
+                            <option value="mean_filter">Mean Filter</option>
+                            <option value="gaussian_filter">Gaussian Filter</option>
+                            <option value="median_filter">Median Filter</option>
+                            <option value="sobel_filter">Sobel Filter</option>
+                            <option value="canny_edge">Canny Edge</option>
+                            <option value="laplacian_filter">Laplacian Filter</option>
                             <option value="histogram_equalization">Histogram Equalization</option>
                             <option value="gamma_correction">Gamma Correction</option>
-                            <option value="rle_compression">Lossless Compression (RLE)</option>
-                            <option value="dct_compression">Lossy Compression (DCT)</option>
+                            <option value="rle_compression">RLE Compression</option>
+                            <option value="dct_compression">DCT Compression</option>
                             <option value="global_thresholding">Global Thresholding</option>
                             <option value="adaptive_thresholding">Adaptive Thresholding</option>
                             <option value="k_means_clustering">K-Means Clustering</option>
-                            <option value="morphological">Morphological Operations</option>
+                            <option value="morphological">Morphological</option>
                             <option value="boundary_extraction">Boundary Extraction</option>
                             <option value="skeletonization">Skeletonization</option>
                             <option value="noise_reduction">Noise Reduction</option>
                             <option value="inpainting">Inpainting</option>
-                            <option value="restoration">Restoration</option>
-                            <option value="feature_detection">Feature Detection (SIFT/ORB)</option>
+                            <option value="feature_detection">Feature Detection</option>
                             <option value="template_matching">Template Matching</option>
+                            <option value="overlay">Overlay</option>
+                            <option value="add_border">Add Border</option>
+                            <option value="bitwise_and">Bitwise AND</option>
+                            <option value="bitwise_or">Bitwise OR</option>
+                            <option value="bitwise_xor">Bitwise XOR</option>
+                            <option value="bitwise_not">Bitwise NOT</option>
+                            <option value="pixel_addition">Pixel Addition</option>
+                            <option value="pixel_subtraction">Pixel Subtraction</option>
+                            <option value="pixel_multiplication">Pixel Multiplication</option>
+                            <option value="pixel_division">Pixel Division</option>
                         </select>
                     </div>
 
-                    <div id="valueGroup" style="display:none;">
-                        <label for="valueInput">Value:</label>
+                    <div class="form-group" id="colorGroup" style="display: none;">
+                        <label for="target_color">Target Color:</label>
+                        <input class="jscolor" id="target_color" name="target_color" value="ff0000">
+                        <label for="replacement_color">Replacement Color:</label>
+                        <input class="jscolor" id="replacement_color" name="replacement_color" value="00ff00">
+                    </div>
+
+                    <div class="form-group" id="rgbGroup" style="display: none;">
+                        <label for="red_factor">Red Factor:</label>
+                        <input type="number" id="red_factor" name="red_factor" step="0.1" value="1.0">
+                        <label for="green_factor">Green Factor:</label>
+                        <input type="number" id="green_factor" name="green_factor" step="0.1" value="1.0">
+                        <label for="blue_factor">Blue Factor:</label>
+                        <input type="number" id="blue_factor" name="blue_factor" step="0.1" value="1.0">
+                    </div>
+
+                    <div class="form-group" id="customFilterGroup" style="display: none;">
+                        <label for="custom_filter_kernel">Custom Filter Kernel:</label>
+                        <textarea id="custom_filter_kernel" name="custom_filter_kernel" rows="3" cols="30">[[1,1,1],[1,1,1],[1,1,1]]</textarea>
+                    </div>
+
+                    <div class="form-group" id="valueGroup" style="display: none;">
+                        <label for="value">Value:</label>
                         <input type="range" min="1" max="100" value="50" class="slider" id="value">
-                    </div>
-                    <div id="rotationGroup" style="display:none;">
-                        <label for="angle">Rotation Angle (degrees):</label>
-                        <input type="range" min="1" max="360" value="90" class="slider" id="angle">
+                        <input type="number" min="1" max="100" value="50" class="number-input" id="valueNumber" style="display: none;">
                     </div>
 
-                    <div class="form-group" id="flipDirectionGroup" style="display: none;">
-                        <label for="direction">Flip Direction:</label>
-                        <select id="direction" name="direction">
-                            <option value="horizontal">Horizontal</option>
-                            <option value="vertical">Vertical</option>
-                            <option value="diagonal">Diagonal</option>
-                        </select>
+                    <div class="form-group" id="angleGroup" style="display: none;">
+                        <label for="angle">Angle:</label>
+                        <input type="range" min="1" max="360" value="180" class="slider" id="value">
                     </div>
 
-                    <div id="translationGroup" style="display:none;">
-                        <label for="dxSlider">Horizontal Shift (dx):</label>
-                        <input type="range" id="dxSlider" min="-100" max="100" value="0">
-                        <span id="dxValue">0</span>
-                        <label for="dySlider">Vertical Shift (dy):</label>
-                        <input type="range" id="dySlider" min="-100" max="100" value="0">
-                        <span id="dyValue">0</span>
+                    <div class="form-group" id="borderGroup" style="display: none;">
+                        <label for="border_size">Border Size:</label>
+                        <input type="number" id="border_size" name="border_size">
+                        <label for="border_color">Border Color:</label>
+                        <input class="jscolor" id="border_color" name="border_color" value="000000">
                     </div>
-                    
 
-                    <div id="gammaCorrectionGroup" style="display:none;">
-                        <label for="gammaValue">Gamma Value:</label>
-                        <input type="number" min="0.1" step="0.1" value="1.0" id="gammaValue">
+                    <div class="form-group" id="maskGroup" style="display: none;">
+                        <label for="mask_path">Mask Path:</label>
+                        <input type="file" id="mask_path" name="mask_path" accept="image/*">
                     </div>
+
+                    <div class="form-group" id="templateGroup" style="display: none;">
+                        <label for="template_path">Template Path:</label>
+                        <input type="file" id="template_path" name="template_path" accept="image/*">
+                    </div>
+
+                    <div class="form-group" id="secondImageGroup" style="display: none;">
+                        <label for="image2">Select Second Image:</label>
+                        <label for="image2" class="custom-file-upload">
+                            Choose File
+                        </label>
+                        <input type="file" id="image2" name="image2" accept="image/*">
+                    </div>
+
                     <button type="submit">Process Image</button>
                 </fieldset>
             </form>
         </section>
-                                     
-        <section id="previewContainer">
-            <p id="predictionText">Upload an image to see the result!</p>
+
+        <section id="result">
             <h2>Processed Image</h2>
-            <img id="processedImage" src="" alt="Processed Image Preview">
+            <img id="resultImage" src="" alt="Processed Image">
         </section>
+
+        <canvas id="imageCanvas" style="display: none;"></canvas>
+
     </main>
+
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
-<script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </html>
