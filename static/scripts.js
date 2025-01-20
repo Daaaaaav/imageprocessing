@@ -10,23 +10,45 @@ function toggleOptions() {
     const maskGroup = document.getElementById('maskGroup');
     const templateGroup = document.getElementById('templateGroup');
     const secondImageGroup = document.getElementById('secondImageGroup');
+    const angleGroup = document.getElementById('angleGroup');
+    const cropGroup = document.getElementById('cropGroup');
 
-    const sliderOperations = ['brightness', 'contrast', 'scale', 'translation', 'mean_filter', 'sobel_filter', 'canny_edge', 'global_thresholding', 'adaptive_thresholding', 'k_means_clustering', 'morphological'];
+    const sliderOperations = ['brightness', 'contrast', 'scale', 'rotation', 'translation', 'mean_filter', 'sobel_filter', 'canny_edge', 'global_thresholding', 'adaptive_thresholding', 'k_means_clustering', 'morphological'];
     const numberOperations = ['gaussian_filter', 'median_filter'];
     const secondImageOperations = ['blend', 'overlay', 'bitwise_and', 'bitwise_or', 'bitwise_xor', 'pixel_addition', 'pixel_subtraction', 'pixel_multiplication', 'pixel_division', 'template_matching', 'inpainting'];
+    const cropOperations = ['crop'];
 
     if (sliderOperations.includes(operation)) {
         valueGroup.style.display = 'block';
         valueSlider.style.display = 'block';
         valueNumber.style.display = 'none';
+        angleGroup.style.display = operation === 'rotation' ? 'block' : 'none';
+        cropGroup.style.display = 'none';
+        maskGroup.style.display = 'none';
     } else if (numberOperations.includes(operation)) {
         valueGroup.style.display = 'block';
         valueSlider.style.display = 'none';
         valueNumber.style.display = 'block';
+        angleGroup.style.display = 'none';
+        cropGroup.style.display = 'none';
+        maskGroup.style.display = 'none';
+    } else if (cropOperations.includes(operation)) {
+        valueGroup.style.display = 'none';
+        angleGroup.style.display = 'none';
+        cropGroup.style.display = 'block';
+        maskGroup.style.display = 'none';
+    } else if (operation === 'inpainting') {
+        valueGroup.style.display = 'none';
+        angleGroup.style.display = 'none';
+        cropGroup.style.display = 'none';
+        maskGroup.style.display = 'block';
     } else {
         valueGroup.style.display = 'none';
+        angleGroup.style.display = 'none';
+        cropGroup.style.display = 'none';
+        maskGroup.style.display = 'none';
     }
-
+    angleGroup.style.display = operation === 'rotate' ? 'block' : 'none';
     colorGroup.style.display = operation === 'change_color' ? 'block' : 'none';
     rgbGroup.style.display = operation === 'adjust_rgb' ? 'block' : 'none';
     customFilterGroup.style.display = operation === 'custom_filter' ? 'block' : 'none';
@@ -41,6 +63,7 @@ function toggleOptions() {
     document.getElementById('translationGroup').style.display = operation === 'translation' ? 'block' : 'none';
     document.getElementById('cropGroup').style.display = operation === 'crop' ? 'block' : 'none';
     document.getElementById('blendGroup').style.display = ['blend', 'overlay', 'bitwise_and', 'bitwise_or', 'bitwise_xor', 'pixel_addition', 'pixel_subtraction', 'pixel_multiplication', 'pixel_division'].includes(operation) ? 'block' : 'none';
+    document.getElementById('blendGroup').style.display = ['blend', 'overlay', 'bitwise_and', 'bitwise_or', 'bitwise_xor', 'pixel_addition', 'pixel_subtraction', 'pixel_multiplication', 'pixel_division'].includes(operation) ? 'block' : 'none';
 }
 
 document.getElementById('operation').addEventListener('change', toggleOptions);
@@ -52,6 +75,15 @@ async function uploadImage(event) {
     const operation = document.getElementById('operation').value;
 
     formData.append('operation', operation);
+
+    if (operation === 'rotate') {
+        formData.append('angle', document.getElementById('angle').value || '0');
+    }
+
+    if (operation === 'inpainting') {
+        formData.append('image', document.getElementById('image').files[0]);
+        formData.append('mask', document.getElementById('mask').files[0]);
+    }
 
     if (operation === 'template_matching' || operation === 'inpainting') {
         const image2 = document.getElementById('image2').files[0];

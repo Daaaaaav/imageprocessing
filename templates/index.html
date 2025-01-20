@@ -88,6 +88,17 @@
                         </select>
                     </div>
 
+                    <div class="form-group" id="cropGroup" style="display: none;">
+                        <label for="cropX">X:</label>
+                        <input type="number" id="cropX" name="cropX" min="0">
+                        <label for="cropY">Y:</label>
+                        <input type="number" id="cropY" name="cropY" min="0">
+                        <label for="cropWidth">Width:</label>
+                        <input type="number" id="cropWidth" name="cropWidth" min="1">
+                        <label for="cropHeight">Height:</label>
+                        <input type="number" id="cropHeight" name="cropHeight" min="1">
+                    </div>
+
                     <div class="form-group" id="colorGroup" style="display: none;">
                         <label for="target_color">Target Color:</label>
                         <input class="jscolor" id="target_color" name="target_color" value="ff0000">
@@ -117,7 +128,7 @@
 
                     <div class="form-group" id="angleGroup" style="display: none;">
                         <label for="angle">Angle:</label>
-                        <input type="range" min="1" max="360" value="180" class="slider" id="value">
+                        <input type="range" min="1" max="360" value="90" class="slider" id="angle">
                     </div>
 
                     <div class="form-group" id="borderGroup" style="display: none;">
@@ -128,8 +139,8 @@
                     </div>
 
                     <div class="form-group" id="maskGroup" style="display: none;">
-                        <label for="mask_path">Mask Path:</label>
-                        <input type="file" id="mask_path" name="mask_path" accept="image/*">
+                        <label for="mask">Mask:</label>
+                        <input type="file" id="mask" name="mask">
                     </div>
 
                     <div class="form-group" id="templateGroup" style="display: none;">

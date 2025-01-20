@@ -73,8 +73,15 @@ def scale(image, value):
 def rotate(image, angle):
     return image.rotate(angle)
 
-def crop(image, left, top, right, bottom):
-    return image.crop((left, top, right, bottom))
+def crop_image(image, x, y, width, height):
+    np_img = np.array(image)
+    img_height, img_width = np_img.shape[:2]
+    x = max(0, min(int(x), img_width))
+    y = max(0, min(int(y), img_height))
+    width = max(1, min(int(width), img_width - x))
+    height = max(1, min(int(height), img_height - y))
+    cropped_img = np_img[y:y+height, x:x+width]
+    return Image.fromarray(cropped_img)
 
 def blend_images(image1, image2, alpha):
     return Image.blend(image1, image2, alpha)
@@ -314,14 +321,18 @@ def noise_reduction(image, method='gaussian'):
         result = wiener_filter(gray)
     return Image.fromarray(result)
 
-def inpainting(image, mask_path):
-    mask = Image.open(mask_path).convert('L')
-    mask = np.array(mask)
-    result = cv2.inpaint(np.array(image), mask, 3, cv2.INPAINT_TELEA)
-    return Image.fromarray(result)
+def inpaint_image(image, mask_path):
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+    if mask is None:
+        raise ValueError("Mask image could not be loaded")
+    np_img = np.array(image)
+    if np_img.shape[:2] != mask.shape:
+        raise ValueError("Mask dimensions do not match image dimensions")
+    inpainted = cv2.inpaint(np_img, mask, inpaintRadius=3, flags=cv2.INPAINT_TELEA)
+    return Image.fromarray(inpainted)
 
 def feature_detection(image, method='sift'):
-    gray = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2GRAY)
+    gray = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2GRAY)  
     if method == 'sift':
         sift = cv2.SIFT_create()
         keypoints, descriptors = sift.detectAndCompute(gray, None)
@@ -335,13 +346,14 @@ def template_matching(image, template_image):
     template = np.array(template_image.convert('L'))
     gray = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2GRAY)
     if template.shape[0] > gray.shape[0] or template.shape[1] > gray.shape[1]:
-        raise ValueError("Template image is larger than the source image")
+        raise ValueError("Template dimensions are larger than image dimensions")
     result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
     top_left = max_loc
     h, w = template.shape
-    matched = cv2.rectangle(gray.copy(), top_left, (top_left[0] + w, top_left[1] + h), 255, 2)
-    return Image.fromarray(matched)
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+    cv2.rectangle(gray, top_left, bottom_right, 255, 2)
+    return Image.fromarray(gray)
 
 @app.route('/')
 def index():
@@ -400,10 +412,11 @@ def predict():
             tx = int(tx or '0')
             ty = int(ty or '0')
         if operation == 'crop':
-            left = int(left or '0')
-            top = int(top or '0')
-            right = int(right or '0')
-            bottom = int(bottom or '0')
+            x = int(request.form.get('cropX', 0))
+            y = int(request.form.get('cropY', 0))
+            width = int(request.form.get('cropWidth', img.width))
+            height = int(request.form.get('cropHeight', img.height))
+            processed_img = crop_image(img, x, y, width, height)
         if operation in ['blend', 'overlay', 'bitwise_and', 'bitwise_or', 'bitwise_xor', 'pixel_addition', 'pixel_subtraction', 'pixel_multiplication', 'pixel_division']:
             alpha = float(alpha or '1')
         if operation == 'add_border':
@@ -445,7 +458,7 @@ def predict():
         elif operation == 'translation':
             processed_img = translation(img, tx, ty)
         elif operation == 'crop':
-            processed_img = crop(img, left, top, right, bottom)
+            processed_img = crop_image(img, left, top, right, bottom)
         elif operation == 'blend':
             processed_img = blend_images(img, img2, alpha)
         elif operation == 'change_color':
@@ -501,7 +514,7 @@ def predict():
         elif operation == 'inpainting':
             if not mask_path:
                 raise ValueError("No mask path provided for inpainting")
-            processed_img = inpainting(img, mask_path)
+            processed_img = inpaint_image(img, mask_path)
         elif operation == 'feature_detection':
             processed_img = feature_detection(img)
         elif operation == 'template_matching':
